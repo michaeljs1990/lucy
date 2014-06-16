@@ -2,9 +2,11 @@ package lucy
 
 import "net/http"
 
+//import "fmt"
+
 type Router struct {
 	//Path that should catch this route
-	paths map[string][]*Matcher
+	Paths map[string][]*Matcher
 }
 
 //Set default values for Route struct
@@ -12,22 +14,19 @@ func Diamond() *Router {
 	return &Router{make(map[string][]*Matcher)}
 }
 
-func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	for _, method := range r.paths[req.Method] {
+func (r *Router) ServeHTTP(w ResponseWriter, req *http.Request) {
+	for _, method := range r.Paths[req.Method] {
 		// Use .Path to get string format of URL
-		if req.URL.Path == method.pattern {
-			method.ServeHTTP(w, req)
+		if match := method.Matching(req.URL.Path); match {
+			//TODO
 		}
 	}
 }
 
 func (r *Router) Insert(method, path string, handler http.Handler) {
-	r.paths[method] = append(r.paths[method], &Matcher{path, handler})
+	r.Paths[method] = append(r.Paths[method], &Matcher{path, handler})
 
-	n := len(path)
-	if n > 0 && path[n-1] == '/' {
-		r.Insert(method, path[:n-1], http.RedirectHandler(path, http.StatusMovedPermanently))
-	}
+	//Handle case where route may be / or nothing at all
 }
 
 // Methods bellow are for ease of use only
@@ -63,6 +62,14 @@ func (r *Router) Options(path string, handler http.Handler) {
 // ability to call ServeHTTP on any of these stucts.
 
 type Matcher struct {
-	pattern string
-	http.Handler
+	Pattern  string
+	Response http.Handler
+}
+
+func (m *Matcher) Matching(u string) bool {
+	if u == m.Pattern {
+		return true
+	} else {
+		return false
+	}
 }
