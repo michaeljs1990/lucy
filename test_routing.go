@@ -1,19 +1,23 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"log"
 	"net/http"
 	"terame.com/mschuett/lucy"
 )
 
-func HelloServer(w lucy.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "hello")
+// func HelloServer(r Path) {
+// 	fmt.Fprintf(w, "hello")
+// }
+
+func testing(s *lucy.Params) []byte {
+	return []byte(s.Get("this"))
 }
 
 func main() {
 	temp := lucy.Diamond()
-	temp.Get("/test", http.HandlerFunc(HelloServer))
+	temp.Get("/test", lucy.HandlerFunc(testing))
 	http.Handle("/", temp)
 
 	//Start Server and listen

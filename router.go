@@ -5,6 +5,7 @@ import "net/http"
 //import "fmt"
 
 type Router struct {
+
 	//Path that should catch this route
 	Paths map[string][]*Matcher
 }
@@ -14,11 +15,14 @@ func Diamond() *Router {
 	return &Router{make(map[string][]*Matcher)}
 }
 
-func (r *Router) ServeHTTP(w ResponseWriter, req *http.Request) {
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, method := range r.Paths[req.Method] {
 		// Use .Path to get string format of URL
 		if match := method.Matching(req.URL.Path); match {
-			//TODO
+			t := Params{}
+			t.SetTest("this")
+			//Write information to screen
+			method.Response.ServeHTTP(w, req)
 		}
 	}
 }
@@ -62,14 +66,43 @@ func (r *Router) Options(path string, handler http.Handler) {
 // ability to call ServeHTTP on any of these stucts.
 
 type Matcher struct {
-	Pattern  string
+	//Patern to serve up this route for
+	Pattern string
+	//Bool to check if this pattern should
+	//check for params or not.
+	//Check bool
+	//Holds params that are availble for this
+	//route is Check is true.
+	//Params map[string]string
+	//Custom Hanlder function
 	Response http.Handler
 }
 
 func (m *Matcher) Matching(u string) bool {
-	if u == m.Pattern {
-		return true
-	} else {
-		return false
-	}
+	// if u == m.Pattern {
+	// 	return true
+	// } else {
+	// 	return false
+	// }
+	return true //Only for testing purposes
+}
+
+type Params struct {
+	Test string
+}
+
+func (p Params) Get(s string) string {
+	return p.Test
+}
+
+func (p *Params) SetTest(s string) {
+	p.Test = s
+}
+
+type HandlerFunc func(*Params) []byte
+
+func (h HandlerFunc) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	t := &Params{}
+	t.SetTest("dumpthisout")
+	writer.Write(h(t))
 }
