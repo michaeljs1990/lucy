@@ -15,12 +15,13 @@ func Diamond() *Router {
 	return &Router{make(map[string][]*Matcher)}
 }
 
+//No heavy lifting we will leave that for method to take care of
+//Here we loop through the current Method to see if it matches
+//any routes that have been set.
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	for _, method := range r.Paths[req.Method] {
 		// Use .Path to get string format of URL
 		if match := method.Matching(req.URL.Path); match {
-			t := Params{}
-			t.SetTest("this")
 			//Write information to screen
 			method.Response.ServeHTTP(w, req)
 		}
@@ -79,14 +80,12 @@ type Matcher struct {
 }
 
 func (m *Matcher) Matching(u string) bool {
-	// if u == m.Pattern {
-	// 	return true
-	// } else {
-	// 	return false
-	// }
-	return true //Only for testing purposes
+	return u == m.Pattern
 }
 
+//Param service that will hold all possible params
+//that the user has defined and make them available
+//to grab with Params.Get()
 type Params struct {
 	Test string
 }
