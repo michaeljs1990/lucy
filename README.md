@@ -28,3 +28,5 @@ Below is an example of how you can use the easy param service to get params that
   	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 ```
+
+Please take a look at the code and leave me any bugs, comments or pull requests.
