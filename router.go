@@ -1,6 +1,9 @@
 package lucy
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 //import "fmt"
 
@@ -69,39 +72,76 @@ func (r *Router) Options(path string, handler http.Handler) {
 type Matcher struct {
 	//Patern to serve up this route for
 	Pattern string
-	//Bool to check if this pattern should
-	//check for params or not.
-	//Check bool
-	//Holds params that are availble for this
-	//route is Check is true.
-	//Params map[string]string
 	//Custom Hanlder function
 	Response http.Handler
 }
 
+//Will want to improve this however i can't think of
+//a nice way to do it right now that would be more
+//efficent. I am sure many exist though.
 func (m *Matcher) Matching(u string) bool {
-	return u == m.Pattern
+	//Set match to keep track of the valid route
+	var match bool = true
+
+	is := strings.Split(u, "/")
+	ps := strings.Split(m.Pattern, "/")
+
+	//Determine if this pattern is one that matches or not.
+	//End loop if pattern does not match.
+	for i := 0; i < len(is); i++ {
+		//Check if index will be out of bounds
+		//Check if arrays are the same size
+		if len(ps) == i || len(is) != len(ps) {
+			match = false
+			break
+		}
+
+		//Check if this is a route param
+		index := strings.Index(ps[i], ":")
+
+		//Test for matching route
+		if is[i] != ps[i] && index != 0 {
+			match = false
+			break
+		}
+
+		//Set params for use later tada!
+		if index == 0 {
+			Param.SetParams(strings.TrimPrefix(ps[i], ":"), is[i])
+		}
+	}
+
+	return match
+
 }
+
+//Make Param struct available to entire namespace
+var Param Params = Params{make(map[string]string)}
 
 //Param service that will hold all possible params
 //that the user has defined and make them available
 //to grab with Params.Get()
 type Params struct {
-	Test string
+	Params map[string]string
 }
 
-func (p Params) Get(s string) string {
-	return p.Test
+//Returned Storred Params
+func (p Params) Get(k string) string {
+	return p.Params[k]
 }
 
-func (p *Params) SetTest(s string) {
-	p.Test = s
+//Helper function to store params
+func (p *Params) SetParams(k string, v string) {
+	p.Params[k] = v
 }
 
-type HandlerFunc func(*Params) []byte
+//Custom handler func to allow for param injection
+type HandlerFunc func(Params) ([]byte, int)
 
-func (h HandlerFunc) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	t := &Params{}
-	t.SetTest("dumpthisout")
-	writer.Write(h(t))
+func (h HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//Get content and status from HandlerFunc
+	//Write status code and return content to page
+	content, status := h(Param)
+	w.WriteHeader(status)
+	w.Write(content)
 }
