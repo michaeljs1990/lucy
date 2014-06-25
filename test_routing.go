@@ -1,15 +1,10 @@
 package main
 
 import (
-	//"fmt"
 	"log"
 	"net/http"
 	"terame.com/mschuett/lucy"
 )
-
-// func HelloServer(r Path) {
-// 	fmt.Fprintf(w, "hello")
-// }
 
 func testing(s lucy.Params) ([]byte, int) {
 	return []byte(s.Get("this")), 503
@@ -30,6 +25,6 @@ func main() {
 	temp.Put("/users/:epanther", lucy.HandlerFunc(users))
 	http.Handle("/", temp)
 
-	//Start Server and listen
+	// Start Server and listen
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

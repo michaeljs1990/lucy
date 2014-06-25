@@ -1,9 +1,9 @@
 lucy
 ====
 
-Lucy sets out to be a simplistic router in go that provides you everything you need in a base router.
+Lucy sets out to be a simplistic router written in Go that provides you everything you need in a base router.
 
-###Example Use
+### Example Use
 
 Below is an example of how you can use the easy param service to get params that you have defined and pass them into your http.Handler function.
 
