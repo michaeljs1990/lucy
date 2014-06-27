@@ -132,12 +132,9 @@ func (p *Params) SetParams(k string, v string) {
 }
 
 // Custom handler func to allow for param injection
-type HandlerFunc func(Params) ([]byte, int)
+type HandlerFunc func(w http.ResponseWriter, r *http.Request)
 
+//Custom implimentation incase needed later.
 func (h HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Get content and status from HandlerFunc
-	// Write status code and return content to page
-	content, status := h(Param)
-	w.WriteHeader(status)
-	w.Write(content)
+	h(w, r)
 }
