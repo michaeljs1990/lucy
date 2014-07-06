@@ -18,7 +18,6 @@ Below is an example of how you can use the easy param service to get params that
 
 	http.Handle("/", t)
 
-	//Start Server and listen
 	log.Fatal(http.ListenAndServe(":8080", nil))
   }
 ```
