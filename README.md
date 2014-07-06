@@ -7,18 +7,19 @@ Lucy sets out to be a simplistic router written in Go that provides you everythi
 
 Below is an example of how you can use the easy param service to get params that you have defined and pass them into your http.Handler function.
 
-```
-  func testing(w http.ResponseWriter, r *http.Request) {
-	  w.Write([]byte(lucy.Param.Get("id")))
-  }
+```go
 
   func main() {
-  	temp := lucy.Diamond()
-  	temp.Get("/test/:id", lucy.HandlerFunc(testing))
-  	http.Handle("/", temp)
-  
-  	//Start Server and listen
-  	log.Fatal(http.ListenAndServe(":8080", nil))
+	t := lucy.Kickstart()
+
+	t.Get("/test/:id", func(e *lucy.Service) {
+		e.W.Write([]byte(e.Param.Get("id")))
+	})
+
+	http.Handle("/", t)
+
+	//Start Server and listen
+	log.Fatal(http.ListenAndServe(":8080", nil))
   }
 ```
 
