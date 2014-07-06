@@ -93,6 +93,12 @@ type Service struct {
 	W        http.ResponseWriter
 }
 
+// Write data to the screen with a response code
+func (s *Service) Writer(b []byte, i int) {
+	s.W.WriteHeader(i)
+	s.W.Write(b)
+}
+
 // This function handles all the matching for the routing
 // It will also set all the params that may come with the route
 func (s *Service) Matcher(u string) bool {
