@@ -1,7 +1,7 @@
 lucy
 ====
 [![GoDoc](https://godoc.org/github.com/gin-gonic/gin?status.png)](http://godoc.org/github.com/michaeljs1990/lucy)
-![Build Status](https://travis-ci.org/michaeljs1990/lucy.svg?branch=master)
+[![Build Status](https://travis-ci.org/michaeljs1990/lucy.svg?branch=master)](https://travis-ci.org/michaeljs1990/lucy.svg?branch=master)
 
 Lucy sets out to be a simplistic router written in Go that provides you everything you need in a base router. Form more information on this package see the [GoDoc](http://godoc.org/github.com/michaeljs1990/lucy) listed here.
 
