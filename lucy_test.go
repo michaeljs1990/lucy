@@ -233,3 +233,19 @@ func TestRedirect(t *testing.T) {
 		t.Error("Redirect /tricky failed on double redirect.")
 	}
 }
+
+// Test to ensure kill is working properly
+func TestKill(t *testing.T) {
+	m := Kickstart()
+
+	killed := false
+
+	m.Get("/killtest", func(s *Service) {
+		s.Kill(500, "test words")
+		killed = true
+	})
+
+	if killed == true {
+		t.Error("/killtest ran all the way through and did not stop at Kill().")
+	}
+}
