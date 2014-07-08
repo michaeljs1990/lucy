@@ -169,21 +169,28 @@ func (s *Service) Redirect(method, path string) {
 	}
 }
 
+// Use abort if you intend for the code running it to be
+// the terminating statement in the function such as when
+// throwing a 404 or 500 error.
+func (s *Service) Abort(code int) {
+	s.W.WriteHeader(code)
+}
+
 // Kill the process and output dump to the screen.
 // Useful for trouble shooting your application.
 func (s *Service) Kill(code int, dump interface{}) {
-	s.W.WriteHeader(code)
 	s.W.Write([]byte(fmt.Sprint("%v", dump)))
+	s.Abort(code)
 }
 
 // Write JSON to screen for the user.
-// func (s *Service) JSON(code int, json JS) {
-// 	// Set Proper Header
-// 	s.W.Header().Set("Content-Type", "application/json")
-// 	s.W.WriteHeader(code)
+func (s *Service) JSON(code int, json JS) {
+	// Set Proper Header
+	s.W.Header().Set("Content-Type", "application/json")
+	s.W.WriteHeader(code)
 
-// 	encoder := json.NewEncoder(s.W)
-// 	if err := encoder.Encode(json); err != nil {
-// 		s.Kill(500)
-// 	}
-// }
+	encoder := json.NewEncoder(s.W)
+	if err := encoder.Encode(json); err != nil {
+		s.Abort(500)
+	}
+}
