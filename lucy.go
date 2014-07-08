@@ -1,6 +1,7 @@
 package lucy
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -184,13 +185,13 @@ func (s *Service) Kill(code int, dump interface{}) {
 }
 
 // Write JSON to screen for the user.
-func (s *Service) JSON(code int, json JS) {
+func (s *Service) JSON(code int, output JS) {
 	// Set Proper Header
 	s.W.Header().Set("Content-Type", "application/json")
 	s.W.WriteHeader(code)
 
 	encoder := json.NewEncoder(s.W)
-	if err := encoder.Encode(json); err != nil {
+	if err := encoder.Encode(output); err != nil {
 		s.Abort(500)
 	}
 }
