@@ -1,6 +1,7 @@
 package lucy
 
 import (
+	//	"errors"
 	"net/http"
 	"strings"
 )
@@ -15,10 +16,20 @@ type Mapper struct {
 	Paths map[string][]*Service
 }
 
+// make mapping available for redirects and to ensure we
+// never have more than one mapper in existance.
+var mappings *Mapper
+
 // Kickstart the application and get it ready to
-// start accepting routes.
+// start accepting routes. This uses the singleton
+// design pattern to ensure only one mapper exists.
 func Kickstart() *Mapper {
-	return &Mapper{make(map[string][]*Service)}
+	if mappings == nil {
+		mappings = &Mapper{make(map[string][]*Service)}
+		return mappings
+	} else {
+		return mappings
+	}
 }
 
 func (r *Mapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -33,7 +44,7 @@ func (r *Mapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *Mapper) Insert(method, path string, handler HandlerFunc) {
+func (r *Mapper) insert(method, path string, handler HandlerFunc) {
 	r.Paths[method] = append(r.Paths[method], &Service{
 		handler,
 		path,
@@ -47,28 +58,28 @@ func (r *Mapper) Insert(method, path string, handler HandlerFunc) {
 // All we do is add a layer on top of Insert
 
 func (r *Mapper) Get(path string, handler HandlerFunc) {
-	r.Insert("HEAD", path, handler)
-	r.Insert("GET", path, handler)
+	r.insert("HEAD", path, handler)
+	r.insert("GET", path, handler)
 }
 
 func (r *Mapper) Post(path string, handler HandlerFunc) {
-	r.Insert("POST", path, handler)
+	r.insert("POST", path, handler)
 }
 
 func (r *Mapper) Put(path string, handler HandlerFunc) {
-	r.Insert("PUT", path, handler)
+	r.insert("PUT", path, handler)
 }
 
 func (r *Mapper) Delete(path string, handler HandlerFunc) {
-	r.Insert("DELETE", path, handler)
+	r.insert("DELETE", path, handler)
 }
 
 func (r *Mapper) Head(path string, handler HandlerFunc) {
-	r.Insert("HEAD", path, handler)
+	r.insert("HEAD", path, handler)
 }
 
 func (r *Mapper) Options(path string, handler HandlerFunc) {
-	r.Insert("OPTIONS", path, handler)
+	r.insert("OPTIONS", path, handler)
 }
 
 type Params struct {
@@ -134,4 +145,24 @@ func (s *Service) Matcher(u string) bool {
 	}
 
 	return match
+}
+
+// Redirect to another route to finish
+// the rest of the request.
+func (s *Service) Redirect(method, path string) {
+	// Change to the correct method and to the
+	// correct path. May need to update a few more
+	// variables down the line.
+	s.R.Method = method
+	s.R.URL.Path = path
+
+	for _, method := range mappings.Paths[method] {
+		// Use .Path to get string format of URL
+		if match := method.Matcher(path); match {
+			// Write to screen
+			method.R = s.R
+			method.W = s.W
+			method.response(method)
+		}
+	}
 }

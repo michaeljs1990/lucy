@@ -188,3 +188,48 @@ func TestMatching(t *testing.T) {
 		t.Error("DELETE route for /delete/:random has not been found or matched.")
 	}
 }
+
+// Test to ensure redirect works as intended
+func TestRedirect(t *testing.T) {
+	m := Kickstart()
+
+	redirect := false
+
+	m.Get("/original", func(s *Service) {
+		s.Redirect("GET", "/redirect")
+	})
+
+	m.Get("/redirect", func(s *Service) {
+		redirect = true
+	})
+
+	// Check double redirect
+	m.Get("/tricky", func(s *Service) {
+		s.Redirect("GET", "/tricky1")
+	})
+
+	m.Get("/tricky1", func(s *Service) {
+		s.Redirect("GET", "/tricky2")
+	})
+
+	m.Get("/tricky2", func(s *Service) {
+		redirect = true
+	})
+
+	w := new(mockResponseWriter)
+
+	req, _ := http.NewRequest("GET", "/original", nil)
+	m.ServeHTTP(w, req)
+
+	if redirect == false {
+		t.Error("GET /original did not redirect to GET /redirect.")
+	}
+
+	redirect = false
+	req, _ = http.NewRequest("GET", "/tricky", nil)
+	m.ServeHTTP(w, req)
+
+	if redirect == false {
+		t.Error("Redirect /tricky failed on double redirect.")
+	}
+}
