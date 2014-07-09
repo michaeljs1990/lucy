@@ -18,9 +18,7 @@ Below is an example of how you can use the easy param service to get params that
 		e.W.Write([]byte(e.Param.Get("id")))
 	})
 
-	http.Handle("/", t)
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r.Run(8080)
   }
 ```
 
