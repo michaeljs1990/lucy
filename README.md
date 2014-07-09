@@ -5,7 +5,7 @@ lucy
 
 ![lucy-logo](http://i.imgur.com/IJivEL8.png)
 
-Lucy sets out to be a simplistic router written in Go that provides you everything you need in a base router. Form more information on this package see the [GoDoc](http://godoc.org/github.com/michaeljs1990/lucy) listed here.
+Lucy sets out to be a simplistic router written in Go that provides you everything you need in a base router. For more information on this package see the [GoDoc](http://godoc.org/github.com/michaeljs1990/lucy) listed here.
 
 ### Example Use
 

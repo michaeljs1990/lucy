@@ -188,3 +188,19 @@ func (s *Service) JSON(code int, output JS) {
 		s.W.WriteHeader(code)
 	}
 }
+
+// getJSON takes an interface to validate
+// against. It will return to you the passed in structure
+// with the proper data.
+func (s *Service) ValidateJSON(v interface{}) interface{} {
+	decoder := json.NewDecoder(s.R.Body)
+
+	err := decoder.Decode(&v)
+
+	// TODO: error handling
+	if err != nil {
+		panic(err)
+	}
+
+	return v
+}
