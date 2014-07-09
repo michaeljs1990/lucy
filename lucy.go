@@ -3,6 +3,7 @@ package lucy
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -33,6 +34,12 @@ func Kickstart() *Mapper {
 	} else {
 		return mappings
 	}
+}
+
+// Get everything ready to server up to people.
+func (r *Mapper) Run(port int) {
+	http.Handle("/", Kickstart())
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }
 
 func (r *Mapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -170,20 +177,6 @@ func (s *Service) Redirect(method, path string) {
 	}
 }
 
-// Use abort if you intend for the code running it to be
-// the terminating statement in the function such as when
-// throwing a 404 or 500 error.
-func (s *Service) Abort(code int) {
-	s.W.WriteHeader(code)
-}
-
-// Kill the process and output dump to the screen.
-// Useful for trouble shooting your application.
-func (s *Service) Kill(code int, dump interface{}) {
-	s.W.Write([]byte(fmt.Sprint("%v", dump)))
-	s.Abort(code)
-}
-
 // Write JSON to screen for the user.
 func (s *Service) JSON(code int, output JS) {
 	// Set Proper Header
@@ -192,6 +185,6 @@ func (s *Service) JSON(code int, output JS) {
 
 	encoder := json.NewEncoder(s.W)
 	if err := encoder.Encode(output); err != nil {
-		s.Abort(500)
+		s.W.WriteHeader(code)
 	}
 }
